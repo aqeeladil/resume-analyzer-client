@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://34.226.121.126/api/";
+const API_URL = import.meta.env.VITE_API_URL;;
 
 // User Registration
 export const registerUser = async (userData) => {
