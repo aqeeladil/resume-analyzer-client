@@ -30,7 +30,11 @@ const Auth = ({ setToken }) => {
             }
             alert(isLogin ? "Login Successful" : "Registration Successful");
         } catch (err) {
-            setError(err.response?.data?.detail || "An error occurred. Please try again.");
+            const defaultMessage = isLogin
+                ? "Login failed. Please check your username and password."
+                : "Registration failed. Please try again with a different username.";
+            
+            setError(err.response?.data?.detail || defaultMessage);
         } finally {
             setLoading(false);
         }

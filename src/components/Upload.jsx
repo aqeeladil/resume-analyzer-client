@@ -1,21 +1,32 @@
 import React, { useState } from "react";
-import { TextField, Button, Box, Typography, Paper } from "@mui/material";
-import axios from "axios";
+import {
+    TextField,
+    Button,
+    Box,
+    Typography,
+    Paper,
+    CircularProgress,
+    Alert,
+} from "@mui/material";
+import { analyzeResume } from "../api"; // Make sure this API function is correctly implemented
 
 const Upload = ({ token, setResult }) => {
     const [resume, setResume] = useState(null);
     const [jobDesc, setJobDesc] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleFileChange = (e) => {
         setResume(e.target.files[0]);
-        setError(""); // Clear error on new file selection
+        setError("");
+        setSuccess("");
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setSuccess("");
 
         if (!resume || !jobDesc) {
             setError("Please upload a resume and enter a job description.");
@@ -28,12 +39,18 @@ const Upload = ({ token, setResult }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/analyze-resume/", formData, {
-                headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-            });
-            setResult(response.data.analysis);
+            const analysis = await analyzeResume(token, formData); // Assuming this returns the backend result
+            // Ensure you extract the data correctly from the response
+            const { analysis: result } = analysis;  // Get the analysis field or adjust based on your backend response
+            setResult(result); // Pass just the analysis result
+            setSuccess("Resume analyzed successfully.");
+            setResume(null);
+            setJobDesc("");
         } catch (error) {
-            setError(error.response?.data?.detail || "Error analyzing resume. Please try again.");
+            const message =
+                error.response?.data?.detail ||
+                "Failed to analyze the resume. Please ensure the file is a PDF and try again.";
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -44,16 +61,14 @@ const Upload = ({ token, setResult }) => {
             <Typography variant="h4" sx={{ mb: 2 }}>Upload Resume</Typography>
 
             <Paper elevation={3} sx={{ p: 3, mt: 2, maxWidth: 500, mx: "auto" }}>
-                {/* File Upload */}
-                <input 
-                    type="file" 
-                    accept="application/pdf" 
-                    onChange={handleFileChange} 
-                    style={{ display: "block", margin: "10px auto" }} 
+                <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileChange}
+                    style={{ display: "block", margin: "10px auto" }}
                 />
                 {resume && <Typography variant="body2" sx={{ color: "gray" }}>{resume.name}</Typography>}
 
-                {/* Job Description Input */}
                 <TextField
                     multiline
                     rows={4}
@@ -64,18 +79,20 @@ const Upload = ({ token, setResult }) => {
                     sx={{ mt: 2 }}
                 />
 
-                {/* Error Message */}
-                {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+                {/* Error or Success Alerts */}
+                {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
-                {/* Submit Button */}
-                <Button 
-                    onClick={handleSubmit} 
-                    variant="contained" 
-                    sx={{ mt: 2, width: "100%" }} 
-                    disabled={loading}
-                >
-                    {loading ? "Analyzing..." : "Analyze Resume"}
-                </Button>
+                <Box sx={{ mt: 3 }}>
+                    <Button
+                        onClick={handleSubmit}
+                        variant="contained"
+                        sx={{ width: "100%" }}
+                        disabled={loading}
+                    >
+                        {loading ? <CircularProgress size={24} /> : "Analyze Resume"}
+                    </Button>
+                </Box>
             </Paper>
         </Box>
     );
