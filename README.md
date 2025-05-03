@@ -1,6 +1,6 @@
 # Resume Analyzer App
 
-- For the video demo, [click here](https://www.awesomescreenshot.com/video/38436796?key=f0b540f8416dc4089e47a568b2f90c15).
+For the video demo, [click here](https://www.awesomescreenshot.com/video/38436796?key=f0b540f8416dc4089e47a568b2f90c15).
 
 ```bash
 # Project Setup
